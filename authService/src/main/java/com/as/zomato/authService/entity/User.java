@@ -6,7 +6,6 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user")
 @Data
 public class User {
 
@@ -32,6 +31,8 @@ public class User {
 
     private String password;
 
+    @OneToOne
+    @JoinColumn(referencedColumnName = "id")
     private Roles roles;
 
     @Column(updatable = false)

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "Roles")
 @Data
 public class Roles {
     @Id
@@ -13,5 +12,8 @@ public class Roles {
 
     @Column(nullable = false)
     private RoleType role;
+
+    @OneToOne(mappedBy = "roles")
+    private User user;
 
 }
