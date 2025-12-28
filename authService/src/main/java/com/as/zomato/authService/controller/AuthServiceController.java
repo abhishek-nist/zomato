@@ -4,6 +4,7 @@ import com.as.zomato.authService.dto.UserDto;
 import com.as.zomato.authService.dto.UserLoginDto;
 import com.as.zomato.authService.dto.UserSignupDto;
 import com.as.zomato.authService.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +20,7 @@ public class AuthServiceController {
     }
 
     @PostMapping("/signup")
-    public UserDto signup(@RequestBody UserSignupDto userSignupDto){
+    public UserDto signup(@Valid @RequestBody UserSignupDto userSignupDto){
         return userService.signup(userSignupDto);
     }
 
