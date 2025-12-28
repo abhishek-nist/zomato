@@ -15,23 +15,24 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserSignupDto {
 
-    @NotBlank
+    @NotBlank(message = "username is required")
     private String userName;
 
-    @NotBlank
+    @NotBlank(message = "password is required")
     private String password;
 
-    @Email
+    @Email(message = "invalid email format")
+    @NotBlank(message = "email is required")
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "firstname is required")
     private String firstName;
 
     private String middleName;
 
     private String lastName;
 
-    @NotNull
+    @NotNull(message = "mobile number is required")
     private Long mobileNumber;
 
 }

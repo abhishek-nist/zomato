@@ -6,6 +6,9 @@ import com.as.zomato.authService.dto.UserSignupDto;
 import com.as.zomato.authService.entity.RoleType;
 import com.as.zomato.authService.entity.Roles;
 import com.as.zomato.authService.entity.User;
+import com.as.zomato.authService.exception.InvalidCredentialsException;
+import com.as.zomato.authService.exception.UserAlreadyExistsException;
+import com.as.zomato.authService.exception.UserNotFoundException;
 import com.as.zomato.authService.repository.UserRepository;
 import com.as.zomato.authService.service.UserService;
 import jakarta.transaction.Transactional;
@@ -28,15 +31,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto signup(UserSignupDto userSignupDto) {
+    public UserDto signup(UserSignupDto userSignupDto) throws UserAlreadyExistsException{
 
+        if(userRepository.findByUserName(userSignupDto.getUserName()).isPresent()){
+            throw new UserAlreadyExistsException("User with this username already exist! Try a different username");
+        }
+        if(userRepository.findByEmail(userSignupDto.getEmail()).isPresent()){
+            throw new UserAlreadyExistsException("User with this Email already exist! Try with other Email");
+        }
+        if(userRepository.findByMobileNumber(userSignupDto.getMobileNumber()).isPresent()){
+            throw new UserAlreadyExistsException("User with this mobile number already exist! Try another mobile number");
+        }
         User user = new User();
         user.setUserName(userSignupDto.getUserName());
         user.setEmail(userSignupDto.getEmail());
         user.setFirstName(userSignupDto.getFirstName());
         user.setMiddleName(userSignupDto.getMiddleName());
         user.setLastName(userSignupDto.getLastName());
-        user.setPassword(userSignupDto.getPassword()); //We will encrypt this later.
+        user.setPassword(passwordEncoder.encode(userSignupDto.getPassword()));
         user.setMobileNumber(userSignupDto.getMobileNumber());
         user.setCreatedAt(LocalDateTime.now());
 
@@ -47,22 +59,16 @@ public class UserServiceImpl implements UserService {
         user.getRoles().add(role);
 
         User savedUser = userRepository.save(user);
-
         return mapToUserDto(savedUser);
     }
-    @Override
-    public Set<RoleType> getUserRoles(Long userId) {
-        return Set.of();
-    }
 
     @Override
-    public UserDto login(UserLoginDto userLoginDto) throws RuntimeException {
-        User user = userRepository.findByUserName(userLoginDto.getUserName()).orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!user.getPassword().equals(userLoginDto.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+    public UserDto login(UserLoginDto userLoginDto) throws UserNotFoundException,InvalidCredentialsException {
+        User user = userRepository.findByUserName(userLoginDto.getUserName()).orElseThrow(() -> new UserNotFoundException("Invalid username!, please check and try again."));
+        if (!passwordEncoder.matches(userLoginDto.getPassword(), user.getPassword()))
+        {
+            throw new InvalidCredentialsException("Invalid credential!, please try again.");
         }
-
         return mapToUserDto(user);
     }
 
