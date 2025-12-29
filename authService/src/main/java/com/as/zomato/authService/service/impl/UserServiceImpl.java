@@ -1,8 +1,6 @@
 package com.as.zomato.authService.service.impl;
 
-import com.as.zomato.authService.dto.UserDto;
-import com.as.zomato.authService.dto.UserLoginDto;
-import com.as.zomato.authService.dto.UserSignupDto;
+import com.as.zomato.authService.dto.*;
 import com.as.zomato.authService.entity.RoleType;
 import com.as.zomato.authService.entity.Roles;
 import com.as.zomato.authService.entity.User;
@@ -15,7 +13,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,8 +40,8 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("User with this mobile number already exist! Try another mobile number");
         }
         User user = new User();
-        user.setUserName(userSignupDto.getUserName());
-        user.setEmail(userSignupDto.getEmail());
+        user.setUserName(userSignupDto.getUserName().toLowerCase());
+        user.setEmail(userSignupDto.getEmail().toLowerCase());
         user.setFirstName(userSignupDto.getFirstName());
         user.setMiddleName(userSignupDto.getMiddleName());
         user.setLastName(userSignupDto.getLastName());
@@ -63,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto login(UserLoginDto userLoginDto) throws UserNotFoundException,InvalidCredentialsException {
-        User user = userRepository.findByUserName(userLoginDto.getUserName()).orElseThrow(() -> new UserNotFoundException("Invalid username!, please check and try again."));
+        User user = findUserByIdentifier(userLoginDto.getIdentifier());
         if (!passwordEncoder.matches(userLoginDto.getPassword(), user.getPassword()))
         {
             throw new InvalidCredentialsException("Invalid credential!, please try again.");
@@ -71,6 +68,31 @@ public class UserServiceImpl implements UserService {
         return mapToUserDto(user);
     }
 
+    private User findUserByIdentifier(String identifier) {
+
+        // Digits-only → reject
+        if (identifier.matches("^[0-9]{7,15}$")) {
+            throw new InvalidCredentialsException(
+                    "Mobile number must include country code (e.g. +919876543210)"
+            );
+        }
+
+        // Email
+        if (identifier.contains("@")) {
+            return userRepository.findByEmail(identifier.toLowerCase())
+                    .orElseThrow(() -> new UserNotFoundException("Invalid email, Please try Again"));
+        }
+
+        // Mobile number (digits only OR +digits)
+        if (identifier.matches("^\\+[1-9][0-9]{7,14}$")) {
+            return userRepository.findByMobileNumber(identifier)
+                    .orElseThrow(() -> new UserNotFoundException("Invalid mobile number"));
+        }
+
+        // Username
+        return userRepository.findByUserName(identifier.toLowerCase())
+                .orElseThrow(() -> new UserNotFoundException("Invalid username, Please try Again"));
+    }
 
     private UserDto mapToUserDto(User user) {
 
