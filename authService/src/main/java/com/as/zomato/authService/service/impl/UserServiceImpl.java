@@ -50,7 +50,6 @@ public class UserServiceImpl implements UserService {
         user.setLastName(userSignupDto.getLastName());
         user.setPassword(passwordEncoder.encode(userSignupDto.getPassword()));
         user.setMobileNumber(userSignupDto.getMobileNumber());
-        user.setCreatedAt(LocalDateTime.now());
 
         Roles role = new Roles();
         role.setRole(RoleType.USER);

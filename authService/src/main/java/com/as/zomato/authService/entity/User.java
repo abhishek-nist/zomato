@@ -46,7 +46,17 @@ public class User {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(insertable = false)
+    @Column
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }
