@@ -27,7 +27,7 @@ public class UserDto {
 
     private String lastName;
 
-    private Long mobileNumber;
+    private String mobileNumber;
 
     private Set<RoleType> roles;
 
