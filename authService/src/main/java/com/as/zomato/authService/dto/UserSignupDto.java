@@ -4,6 +4,7 @@ package com.as.zomato.authService.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,9 +17,11 @@ import lombok.Setter;
 public class UserSignupDto {
 
     @NotBlank(message = "username is required")
+    @Size(min = 5, max = 20, message = "username must be between 5 and 20 characters")
     private String userName;
 
     @NotBlank(message = "password is required")
+    @Size(min = 5, max = 16, message = "Password must be between 8 and 16 characters")
     private String password;
 
     @Email(message = "invalid email format")
